@@ -1,38 +1,30 @@
-"use client";
+import { setEmployeeSession } from "../actions/actions";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { EmployeeType, DepartmentType } from "../constants/mock-data";
-
-const EMPLOYEE_TYPES: { value: EmployeeType; label: string }[] = [
+const EMPLOYEE_TYPES = [
   { value: "full-time", label: "Full-Time Staff" },
   { value: "part-time", label: "Part-Time Staff" },
   { value: "contractor-individual", label: "Individual Contractor" },
   { value: "contractor-company", label: "Company Contractor" },
-];
+] as const;
 
-const DEPARTMENTS: { value: DepartmentType; label: string }[] = [
+const DEPARTMENTS = [
   { value: "engineering", label: "Engineering" },
   { value: "hr", label: "Human Resources (HR)" },
   { value: "finance", label: "Finance" },
   { value: "none", label: "No Department (Global Only)" },
-];
+] as const;
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [type, setType] = useState<EmployeeType>("full-time");
-  const [dept, setDept] = useState<DepartmentType>("engineering");
-
-  const handleSimulatedLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push(`/onboarding?type=${type}&dept=${dept}`);
-  };
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-6">
         <form
-          onSubmit={handleSimulatedLogin}
+          action={async (formData: FormData) => {
+            "use server";
+            const type = formData.get("type") as string;
+            const dept = formData.get("dept") as string;
+            await setEmployeeSession(type as any, dept as any);
+          }}
           className="space-y-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-lg"
         >
           <div className="space-y-1.5">
@@ -44,8 +36,8 @@ export default function LoginPage() {
             </label>
             <select
               id="type-select"
-              value={type}
-              onChange={(e) => setType(e.target.value as EmployeeType)}
+              name="type"
+              defaultValue="contractor-individual"
               className="w-full cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-1"
             >
               {EMPLOYEE_TYPES.map((t) => (
@@ -65,8 +57,8 @@ export default function LoginPage() {
             </label>
             <select
               id="dept-select"
-              value={dept}
-              onChange={(e) => setDept(e.target.value as DepartmentType)}
+              name="dept"
+              defaultValue="none"
               className="w-full cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-1"
             >
               {DEPARTMENTS.map((d) => (
