@@ -33,6 +33,10 @@ export function OnboardingProvider({ initialPipelineData, storageKey, empType, e
   const [pipelines, setPipelines] = useState<OnboardingPipeline[]>(initialPipelineData);
   const [isPending, startTransition] = useTransition();
 
+  React.useEffect(() => {
+    setPipelines(initialPipelineData);
+  }, [JSON.stringify(initialPipelineData)]);
+
   const allStages = useMemo<OnboardingStage[]>(
     () => pipelines.flatMap((p) => p.stages),
     [pipelines]

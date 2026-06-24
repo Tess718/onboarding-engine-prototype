@@ -62,7 +62,7 @@ export function OnboardingTaskWidget({
 
           {isLocked && (
             <p className="pt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
-              🔒 Locked until prerequisite tasks are completed.
+               Locked until prerequisite tasks are completed.
             </p>
           )}
         </div>

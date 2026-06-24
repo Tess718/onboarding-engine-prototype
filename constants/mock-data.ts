@@ -1,7 +1,7 @@
 export type EmployeeType = "full-time" | "part-time" | "contractor-individual" | "contractor-company";
 export type DepartmentType = "engineering" | "hr" | "finance" | "none";
 
-export type FieldType = "text" | "password" | "tel" | "checkbox" | "signature" | "info_block";
+export type FieldType = "text" | "password" | "tel" | "email" | "checkbox" | "signature" | "info_block" | "radio_card_group" | "slider" | "terminal_block" | "authenticator" | "action_button" | "datetime" | "input_group";
 
 export interface StepField {
   id: string;
@@ -10,6 +10,12 @@ export interface StepField {
   placeholder?: string;
   content?: string;
   required?: boolean;
+  options?: { id: string; title: string; desc?: string }[];
+  min?: number;
+  max?: number;
+  inputs?: { id: string; label: string; placeholder?: string; maxLength?: number }[];
+  commands?: { prefix?: string; text: string; color?: string; bold?: boolean }[];
+  actionText?: string;
 }
 
 export interface OnboardingStep {
@@ -106,7 +112,13 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 7,
             dueStatus: "normal",
-            isManualAcknowledgement: false
+            fields: [
+              { id: "medicalPlan", type: "radio_card_group", label: "Choose Coverage Option", required: true, options: [
+                { id: "ppo", title: "Standard PPO", desc: "Low copays, wide network." },
+                { id: "hdhp", title: "HDHP HSA", desc: "Tax-free savings account." },
+                { id: "hmo", title: "Premier HMO", desc: "No deductibles, local care." },
+              ]}
+            ]
           },
           { 
             id: "step-ft-2", 
@@ -115,7 +127,9 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 7,
             dueStatus: "normal",
-            isManualAcknowledgement: false
+            fields: [
+              { id: "contributionRate", type: "slider", label: "Retirement Savings Contribution", min: 0, max: 15, required: true }
+            ]
           },
           { 
             id: "step-ft-3", 
@@ -124,7 +138,12 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 7,
             dueStatus: "normal",
-            isManualAcknowledgement: false
+            fields: [
+              { id: "directDeposit", type: "input_group", label: "Bank Account Information", required: true, inputs: [
+                { id: "routing", label: "Routing Number", placeholder: "9 Digits", maxLength: 9 },
+                { id: "account", label: "Account Number", placeholder: "Up to 12 Digits", maxLength: 12 }
+              ]}
+            ]
           },
         ],
       },
@@ -176,7 +195,9 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 5,
             dueStatus: "normal",
-            isManualAcknowledgement: false
+            fields: [
+              { id: "shifts", type: "checkbox", label: "I have submitted my shift preferences to my manager.", required: true }
+            ]
           },
           { 
             id: "step-pt-2", 
@@ -185,7 +206,10 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 5,
             dueStatus: "normal",
-            isManualAcknowledgement: false
+            fields: [
+              { id: "ptInfo", type: "info_block", label: "Part-Time Hourly Compliance", content: "⚠️ Maximum Weekly Threshold: 29 Hours\n\nPart-time workers are strictly prohibited from logging more than 29 hours in a single pay cycle without pre-authorization from the regional operations director." },
+              { id: "hoursAgreed", type: "checkbox", label: "I have read and agree to the hours limit.", required: true }
+            ]
           },
         ],
       },
@@ -303,8 +327,10 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 4,
             dueStatus: "normal",
-            isManualAcknowledgement: false,
             dependsOn: { steps: [], order: 1 },
+            fields: [
+              { id: "gitHubEmail", type: "email", label: "GitHub Account Email", placeholder: "e.g. dev@company.com", required: true }
+            ]
           },
           {
             id: "step-3-2",
@@ -313,8 +339,13 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 1,
             dueStatus: "due-soon",
-            isManualAcknowledgement: true,
             dependsOn: { steps: ["step-3-1"], order: 2 },
+            fields: [
+              { id: "terminalClone", type: "terminal_block", label: "bash — clone", commands: [
+                { text: "# Clone the repository", color: "text-zinc-500" },
+                { prefix: "$", text: "git clone git@github.com:org/monorepo.git", color: "text-emerald-400" }
+              ]}
+            ]
           },
           {
             id: "step-3-3",
@@ -323,8 +354,14 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 6,
             dueStatus: "normal",
-            isManualAcknowledgement: true,
             dependsOn: { steps: ["step-3-2"], order: 3 },
+            fields: [
+              { id: "terminalNpm", type: "terminal_block", label: "bash — npm", commands: [
+                { prefix: "user@mac:~/monorepo$", text: "npm run setup-cli", color: "text-zinc-300" },
+                { text: "Installing node packages... done.", color: "text-amber-400" },
+                { text: "✓ Terraform and AWS CLI verified!", color: "text-emerald-400", bold: true }
+              ]}
+            ]
           },
         ],
       },
@@ -341,8 +378,10 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: -2,
             dueStatus: "overdue",
-            isManualAcknowledgement: false,
             dependsOn: { steps: [], order: 1 },
+            fields: [
+              { id: "otp", type: "authenticator", label: "Google Authenticator Setup", required: true }
+            ]
           },
           {
             id: "step-4-2",
@@ -351,8 +390,10 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: -2,
             dueStatus: "overdue",
-            isManualAcknowledgement: false,
             dependsOn: { steps: ["step-4-1"], order: 2 },
+            fields: [
+              { id: "sshGen", type: "action_button", label: "Generate Key Pair", actionText: "Generate Key Pair", required: true }
+            ]
           },
           {
             id: "step-4-3",
@@ -380,7 +421,9 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 5,
             dueStatus: "normal",
-            isManualAcknowledgement: false
+            fields: [
+              { id: "slackJoin", type: "action_button", label: "Launch Messaging Platform", actionText: "Join #engineering Channel", required: true }
+            ]
           },
           { 
             id: "step-5-2", 
@@ -389,7 +432,9 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             isCompleted: false,
             dueOffsetDays: 7,
             dueStatus: "normal",
-            isManualAcknowledgement: false
+            fields: [
+              { id: "syncTime", type: "datetime", label: "Select Sync Time", required: true }
+            ]
           },
           { 
             id: "step-5-3", 
