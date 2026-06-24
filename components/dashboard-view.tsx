@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useOnboarding } from "../context/OnboardingContext";
+import { logoutSession } from "../actions/actions";
 
 export function DashboardView() {
   const { allStages, completeStepById, empDept } = useOnboarding();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showCompletionBanner, setShowCompletionBanner] = useState(true);
 
   const ambientStages = allStages.filter((s) => !s.isSystemGate);
   const ambientSteps = ambientStages.flatMap((s) => s.steps);
@@ -28,9 +30,22 @@ export function DashboardView() {
   }
 
   const pendingCount = incompleteAmbientSteps.length;
-  const motivationalMessage = pendingCount > 0
+  const isCompleted = pendingCount === 0;
+
+  useEffect(() => {
+    if (isCompleted) {
+      const timer = setTimeout(() => {
+        setShowCompletionBanner(false);
+      }, 5000); // Hide after 5 seconds
+      return () => clearTimeout(timer);
+    } else {
+      setShowCompletionBanner(true);
+    }
+  }, [isCompleted]);
+
+  const motivationalMessage = !isCompleted
     ? `${greeting}! You have ${pendingCount} pending onboarding task${pendingCount > 1 ? "s" : ""} remaining. Let's make some progress today!`
-    : `${greeting}! You have completed all onboarding tasks. Welcome fully to the workspace!`;
+    : `${greeting}! You have completed all onboarding tasks.`;
 
   function formatDueDate(dueOffsetDays: number) {
     const targetDate = new Date();
@@ -52,27 +67,35 @@ export function DashboardView() {
               Welcome back to your corporate dashboard workspace.
             </p>
           </div>
+          <button
+            onClick={() => logoutSession()}
+            className="rounded-lg bg-[var(--color-card)] border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-foreground)] hover:bg-[var(--color-muted)] transition-colors shadow-sm"
+          >
+            Log Out
+          </button>
         </div>
 
-        <div className="rounded-xl border border-violet-100 bg-violet-50/50 p-5 dark:border-violet-900/30 dark:bg-violet-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-          <div className="space-y-1">
-            <h2 className="text-sm font-semibold text-violet-900 dark:text-violet-300 flex items-center gap-1.5">
-              <span>👋</span>
-              <span>{greeting}</span>
-            </h2>
-            <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed">
-              {motivationalMessage}
-            </p>
+        {(!isCompleted || showCompletionBanner) && (
+          <div className="rounded-xl border border-violet-100 bg-violet-50/50 p-5 dark:border-violet-900/30 dark:bg-violet-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm transition-opacity duration-500">
+            <div className="space-y-1">
+              <h2 className="text-sm font-semibold text-violet-900 dark:text-violet-300 flex items-center gap-1.5">
+                <span>👋</span>
+                <span>{greeting}</span>
+              </h2>
+              <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed">
+                {motivationalMessage}
+              </p>
+            </div>
+            {nextAmbientStep && (
+              <Link
+                href={`/task/${nextAmbientStep.id}`}
+                className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-750 transition-colors shadow-sm text-center shrink-0"
+              >
+                Start Next Task →
+              </Link>
+            )}
           </div>
-          {nextAmbientStep && (
-            <Link
-              href={`/task/${nextAmbientStep.id}`}
-              className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-750 transition-colors shadow-sm text-center shrink-0"
-            >
-              Start Next Task →
-            </Link>
-          )}
-        </div>
+        )}
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4 items-start">
           <div className="md:col-span-3 space-y-6">

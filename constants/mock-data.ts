@@ -1,6 +1,17 @@
 export type EmployeeType = "full-time" | "part-time" | "contractor-individual" | "contractor-company";
 export type DepartmentType = "engineering" | "hr" | "finance" | "none";
 
+export type FieldType = "text" | "password" | "tel" | "checkbox" | "signature" | "info_block";
+
+export interface StepField {
+  id: string;
+  type: FieldType;
+  label?: string;
+  placeholder?: string;
+  content?: string;
+  required?: boolean;
+}
+
 export interface OnboardingStep {
   id: string;
   title: string;
@@ -11,6 +22,7 @@ export interface OnboardingStep {
   isManualAcknowledgement?: boolean;
   requiresSpecialView?: boolean;
   actionUrl?: string;
+  fields?: StepField[];
   dependsOn?: {
     steps: string[];
     order?: number;
@@ -225,7 +237,10 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             description: "Update your credentials for baseline security.", 
             isCompleted: false,
             dueOffsetDays: 0,
-            dueStatus: "normal"
+            dueStatus: "normal",
+            fields: [
+              { id: "password", type: "password", placeholder: "New Secure Password", required: true }
+            ]
           },
           { 
             id: "step-2-2", 
@@ -233,7 +248,11 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             description: "Confirm your full legal name and default contact phone number.", 
             isCompleted: false,
             dueOffsetDays: 0,
-            dueStatus: "normal"
+            dueStatus: "normal",
+            fields: [
+              { id: "fullName", type: "text", placeholder: "Legal Full Name", required: true },
+              { id: "phoneNumber", type: "tel", placeholder: "Phone Number (e.g. +234 80 123 4567)", required: true }
+            ]
           },
           { 
             id: "step-2-3", 
@@ -241,8 +260,25 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             description: "Review and electronically sign the master compliance and services agreement.", 
             isCompleted: false,
             dueOffsetDays: 0,
-            dueStatus: "normal"
+            dueStatus: "normal",
+            fields: [
+              { id: "msa_info", type: "info_block", label: "Master Compliance Policy Agreement", content: "By signing below, you agree to comply with all information security frameworks, multi-factor authentication protocols, and regular credential lifecycle audits established by the operations division.\n\nAny non-compliance may result in immediate suspension of access keys to internal system repositories." },
+              { id: "signature", type: "signature", placeholder: "Type Full Name to E-Sign", required: true },
+              { id: "policyAgreed", type: "checkbox", label: "I acknowledge that I have read and agree to all company compliance policies.", required: true }
+            ]
           },
+          { 
+            id: "step-2-4", 
+            title: "Accept Acceptable Use Policy", 
+            description: "Confirm understanding of IT and data usage policies.", 
+            isCompleted: false,
+            dueOffsetDays: 0,
+            dueStatus: "normal",
+            fields: [
+              { id: "aup_agreed", type: "checkbox", label: "I confirm understanding of IT and data usage policies.", required: true }
+            ]
+          },
+          
         ],
       },
     ],

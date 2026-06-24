@@ -33,3 +33,10 @@ export async function setEmployeeSession(type: EmployeeType, dept: DepartmentTyp
   cookieStore.set("emp_dept", dept, { path: "/" });
   redirect(`/onboarding`);
 }
+
+export async function logoutSession() {
+  const cookieStore = await cookies();
+  cookieStore.delete("emp_type");
+  cookieStore.delete("emp_dept");
+  redirect("/");
+}
