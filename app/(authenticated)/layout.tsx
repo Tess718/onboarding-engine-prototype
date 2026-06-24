@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerOnboardingState } from "../../actions/onboarding-server";
 import { OnboardingProvider } from "../../context/OnboardingContext";
 import { OnboardingRunner } from "../../components/onboarding-runner";
+import { RouteGuard } from "../../components/route-guard";
 
 export default async function AuthenticatedLayout({
   children,
@@ -39,11 +40,13 @@ export default async function AuthenticatedLayout({
           </div>
         </main>
       ) : (
-        <div className="flex min-h-screen flex-col">
-          <div className="flex-1">
-            {children}
+        <RouteGuard>
+          <div className="flex min-h-screen flex-col">
+            <div className="flex-1">
+              {children}
+            </div>
           </div>
-        </div>
+        </RouteGuard>
       )}
     </OnboardingProvider>
   );

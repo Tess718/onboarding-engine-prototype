@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { EmployeeType, DepartmentType } from "../constants/mock-data";
 import { OnboardingPipeline } from "../constants/mock-data";
 
@@ -24,6 +25,7 @@ export async function updateOnboardingProgress(
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
+  revalidatePath("/", "layout");
   return { success: true };
 }
 

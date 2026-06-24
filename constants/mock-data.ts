@@ -24,9 +24,10 @@ export interface OnboardingStep {
   description: string;
   isCompleted: boolean;
   dueOffsetDays: number;
-  dueStatus: "overdue" | "due-soon" | "normal";
+  dueStatus: "overdue" | "due-soon" | "normal" | "warning";
   isManualAcknowledgement?: boolean;
   requiresSpecialView?: boolean;
+  blocksRoutes?: string[];
   actionUrl?: string;
   fields?: StepField[];
   dependsOn?: {
@@ -374,25 +375,30 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
           {
             id: "step-4-1",
             title: "Enable 2FA on GitHub",
-            description: "Two-factor authentication is mandatory for all engineering accounts.",
+            description: "Secure your GitHub account with a YubiKey or authenticator app.",
             isCompleted: false,
-            dueOffsetDays: -2,
-            dueStatus: "overdue",
-            dependsOn: { steps: [], order: 1 },
+            dueOffsetDays: 1,
+            dueStatus: "normal",
+            isManualAcknowledgement: false,
+            blocksRoutes: ["/engineering"],
             fields: [
-              { id: "otp", type: "authenticator", label: "Google Authenticator Setup", required: true }
+              { id: "2fa-code", type: "authenticator", label: "Enter Authenticator Code", required: true }
             ]
           },
           {
             id: "step-4-2",
-            title: "Generate SSH Key Pair",
-            description: "Create and register your SSH key for secure repository access.",
+            title: "Generate SSH Key",
+            description: "Create an Ed25519 SSH key for secure repo access.",
             isCompleted: false,
-            dueOffsetDays: -2,
-            dueStatus: "overdue",
+            dueOffsetDays: 1,
+            dueStatus: "warning",
+            isManualAcknowledgement: false,
+            blocksRoutes: ["/engineering"],
             dependsOn: { steps: ["step-4-1"], order: 2 },
             fields: [
-              { id: "sshGen", type: "action_button", label: "Generate Key Pair", actionText: "Generate Key Pair", required: true }
+              { id: "keygen-cmd", type: "terminal_block", label: "bash", commands: [{ prefix: "$", text: "ssh-keygen -t ed25519 -C \"you@company.com\"", color: "text-emerald-400" }] },
+              { id: "keygen-action", type: "action_button", label: "Execute ssh-keygen Locally" },
+              { id: "keygen-confirm", type: "checkbox", label: "I have securely backed up my private key", required: true }
             ]
           },
           {
@@ -459,3 +465,5 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
     ],
   },
 ];
+
+export const alwaysAllowedRoutes = ["/dashboard", "/task/*"];
