@@ -197,7 +197,7 @@ export function OnboardingRunner() {
             disabled={isDisabled}
             className="w-full py-4 px-6 rounded-xl bg-[#FFCD00] hover:bg-[#E6B800] active:scale-[0.99] text-zinc-900 font-extrabold text-sm tracking-wider shadow-sm transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed uppercase"
           >
-            {activeGateStep.id === "step-2-4" ? "✓ Finish & Enter Workspace" : "Continue"}
+            {activeGateStep.id === "step-2-3" ? "✓ Finish & Enter Workspace" : "Continue"}
           </button>
         </div>
       </div>
