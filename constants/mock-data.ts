@@ -243,14 +243,6 @@ export const mock3DMatrixData: OnboardingPipeline[] = [
             dueOffsetDays: 0,
             dueStatus: "normal"
           },
-          {
-            id: "step-2-4",
-            title: "Welcome Orientation Review",
-            description: "I confirm that I have reviewed the welcome orientation guidelines.",
-            isCompleted: false,
-            dueOffsetDays: 0,
-            dueStatus: "normal"
-          }
         ],
       },
     ],

@@ -179,7 +179,7 @@ export function DashboardView() {
                   {completedAmbientStepsCount} of {totalAmbientSteps} steps completed
                 </p>
                 <span className="text-[10px] font-bold text-violet-600 dark:text-violet-400 group-hover:underline pt-1 inline-block">
-                  🔍 View Checklist →
+                  View Checklist →
                 </span>
               </div>
             </button>
