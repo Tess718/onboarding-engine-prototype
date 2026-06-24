@@ -1,60 +1,50 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import {
-  mock3DMatrixData,
-  EmployeeType,
-  DepartmentType,
-} from "../../constants/mock-data";
+import { getServerOnboardingState } from "../../actions/onboarding-server";
 import { OnboardingProvider } from "../../context/OnboardingContext";
-import { OnboardingStatusBanner } from "../../components/onboarding-status-banner";
+import { OnboardingRunner } from "../../components/onboarding-runner";
 
 export default async function AuthenticatedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const empType = cookieStore.get("emp_type")?.value as EmployeeType | undefined;
-  const empDept = cookieStore.get("emp_dept")?.value as DepartmentType | undefined;
+  const onboardingState = await getServerOnboardingState();
 
-  if (!empType || !empDept) {
+  if (!onboardingState) {
     redirect("/");
   }
 
-  const computedPipelines = mock3DMatrixData.filter(
-    (pipeline) =>
-      pipeline.targetTypes.includes(empType) &&
-      (pipeline.targetDepartments
-        ? pipeline.targetDepartments.includes(empDept)
-        : true),
-  );
-
-  const storageKey = `onboarding:emp_123:${empType}:${empDept}`;
-
-  const progressRaw = cookieStore.get(`progress:${storageKey}`)?.value;
-  let progressMap: Record<string, boolean> = {};
-  if (progressRaw) {
-    try {
-      progressMap = JSON.parse(progressRaw) as Record<string, boolean>;
-    } catch {
-    }
-  }
-
-  const hydratedPipelines = computedPipelines.map((pipeline) => ({
-    ...pipeline,
-    stages: pipeline.stages.map((stage) => ({
-      ...stage,
-      steps: stage.steps.map((step) => ({
-        ...step,
-        isCompleted: progressMap[step.id] === true ? true : step.isCompleted,
-      })),
-    })),
-  }));
+  const { hydratedPipelines, storageKey, hasIncompleteGate, empType, empDept } = onboardingState;
 
   return (
-    <OnboardingProvider initialPipelineData={hydratedPipelines} storageKey={storageKey}>
-      <OnboardingStatusBanner />
-      {children}
+    <OnboardingProvider
+      initialPipelineData={hydratedPipelines}
+      storageKey={storageKey}
+      empType={empType}
+      empDept={empDept}
+    >
+      {hasIncompleteGate ? (
+        <main className="min-h-screen bg-white text-zinc-900 flex flex-col lg:flex-row">
+          <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 lg:p-16 xl:p-24 min-h-screen">
+            <OnboardingRunner />
+          </div>
+          <div className="hidden lg:block lg:w-1/2 relative min-h-screen">
+            <div className="absolute inset-0 p-4">
+              <img
+                src="https://img.magnific.com/premium-photo/successful-confident-group-african-american-corporate-modern-office-with-big-windows_175356-7847.jpg?uid=R133884520&ga=GA1.1.443459616.1782307401&semt=ais_incoming&w=740&q=80"
+                alt="Corporate Group Office"
+                className="w-full h-full object-cover rounded-[24px] shadow-md"
+              />
+            </div>
+          </div>
+        </main>
+      ) : (
+        <div className="flex min-h-screen flex-col">
+          <div className="flex-1">
+            {children}
+          </div>
+        </div>
+      )}
     </OnboardingProvider>
   );
 }

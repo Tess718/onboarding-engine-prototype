@@ -1,4 +1,5 @@
 import { setEmployeeSession } from "../actions/actions";
+import { EmployeeType, DepartmentType } from "../constants/mock-data";
 
 const EMPLOYEE_TYPES = [
   { value: "full-time", label: "Full-Time Staff" },
@@ -23,7 +24,7 @@ export default function LoginPage() {
             "use server";
             const type = formData.get("type") as string;
             const dept = formData.get("dept") as string;
-            await setEmployeeSession(type as any, dept as any);
+            await setEmployeeSession(type as EmployeeType, dept as DepartmentType);
           }}
           className="space-y-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-lg"
         >

@@ -1,15 +1,18 @@
 "use client";
 
 import React, { createContext, useContext, useState, useMemo, useTransition } from "react";
-import { OnboardingPipeline, OnboardingStage } from "../constants/mock-data";
+import { OnboardingPipeline, OnboardingStage, EmployeeType, DepartmentType } from "../constants/mock-data";
 import { updateOnboardingProgress } from "../actions/actions";
 
 interface OnboardingContextProps {
   pipelines: OnboardingPipeline[];
   allStages: OnboardingStage[];
+  hasIncompleteGate: boolean;
   canAccessDashboard: boolean;
   allCompleted: boolean;
   isPending: boolean;
+  empType: EmployeeType;
+  empDept: DepartmentType;
   isStageUnlocked: (stageId: string) => boolean;
   isStepUnlocked: (stageId: string, stepId: string) => boolean;
   handleToggleStep: (pipelineIdx: number, stageIdx: number, stepId: string) => void;
@@ -21,10 +24,12 @@ const OnboardingContext = createContext<OnboardingContextProps | undefined>(unde
 interface OnboardingProviderProps {
   initialPipelineData: OnboardingPipeline[];
   storageKey: string;
+  empType: EmployeeType;
+  empDept: DepartmentType;
   children: React.ReactNode;
 }
 
-export function OnboardingProvider({ initialPipelineData, storageKey, children }: OnboardingProviderProps) {
+export function OnboardingProvider({ initialPipelineData, storageKey, empType, empDept, children }: OnboardingProviderProps) {
   const [pipelines, setPipelines] = useState<OnboardingPipeline[]>(initialPipelineData);
   const [isPending, startTransition] = useTransition();
 
@@ -33,12 +38,17 @@ export function OnboardingProvider({ initialPipelineData, storageKey, children }
     [pipelines]
   );
 
-  const canAccessDashboard = useMemo(
+  const hasIncompleteGate = useMemo(
     () =>
       allStages
-        .filter((s) => s.isMandatory)
-        .every((s) => s.steps.every((step) => step.isCompleted)),
+        .filter((s) => s.isSystemGate)
+        .some((s) => s.steps.some((step) => !step.isCompleted)),
     [allStages]
+  );
+
+  const canAccessDashboard = useMemo(
+    () => !hasIncompleteGate,
+    [hasIncompleteGate]
   );
 
   const allCompleted = useMemo(
@@ -114,9 +124,12 @@ export function OnboardingProvider({ initialPipelineData, storageKey, children }
       value={{
         pipelines,
         allStages,
+        hasIncompleteGate,
         canAccessDashboard,
         allCompleted,
         isPending,
+        empType,
+        empDept,
         isStageUnlocked,
         isStepUnlocked,
         handleToggleStep,

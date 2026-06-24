@@ -1,12 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useOnboarding } from "../context/OnboardingContext";
 
 export function OnboardingStatusBanner() {
   const { allStages, allCompleted } = useOnboarding();
-  const pathname = usePathname();
 
   const totalSteps = allStages.reduce((acc, s) => acc + s.steps.length, 0);
   const completedSteps = allStages.reduce(
@@ -14,8 +12,12 @@ export function OnboardingStatusBanner() {
     0
   );
 
+  const nextAmbientStep = allStages
+    .filter((s) => !s.isSystemGate)
+    .flatMap((s) => s.steps)
+    .find((step) => !step.isCompleted);
 
-  if (allCompleted || totalSteps === 0 || pathname === "/onboarding") return null;
+  if (allCompleted || totalSteps === 0 || !nextAmbientStep) return null;
 
   const pct = Math.round((completedSteps / totalSteps) * 100);
 
@@ -34,10 +36,10 @@ export function OnboardingStatusBanner() {
           </div>
         </div>
         <Link
-          href="/onboarding"
+          href={`/task/${nextAmbientStep.id}`}
           className="rounded-md bg-amber-500 px-3 py-1.5 text-[11px] font-semibold text-white transition-opacity hover:opacity-90"
         >
-          Resume Journey →
+          Continue: {nextAmbientStep.title} →
         </Link>
       </div>
     </div>

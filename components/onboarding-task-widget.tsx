@@ -1,7 +1,6 @@
 "use client";
 
 import { useOnboarding } from "../context/OnboardingContext";
-import { useSearchParams, useRouter } from "next/navigation";
 
 interface OnboardingTaskWidgetProps {
   stageId: string;
@@ -16,9 +15,6 @@ export function OnboardingTaskWidget({
 }: OnboardingTaskWidgetProps) {
   const { allStages, completeStepById, isStageUnlocked, isStepUnlocked } = useOnboarding();
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
   const stage = allStages.find((s) => s.id === stageId);
   const step = stage?.steps.find((st) => st.id === stepId);
 
@@ -30,10 +26,6 @@ export function OnboardingTaskWidget({
     if (step.isCompleted || isLocked) return;
 
     completeStepById(stageId, stepId);
-    const origin = searchParams.get("origin");
-    if (origin === "onboarding") {
-      router.push("/onboarding");
-    }
   };
 
   return (
