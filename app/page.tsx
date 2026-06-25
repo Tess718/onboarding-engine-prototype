@@ -1,4 +1,4 @@
-import { setEmployeeSession } from "../actions/actions";
+import { setEmployeeSession } from "../features/onboarding/actions/onboarding-mutations";
 import { EmployeeType, DepartmentType } from "../constants/mock-data";
 
 const EMPLOYEE_TYPES = [

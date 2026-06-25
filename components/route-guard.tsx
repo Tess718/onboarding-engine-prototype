@@ -2,22 +2,25 @@
 
 import React, { useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { useOnboarding } from "../context/OnboardingContext";
-import { alwaysAllowedRoutes } from "../constants/mock-data";
-import { isMatch } from "../lib/route-matcher";
+import { alwaysAllowedRoutes, OnboardingPipeline } from "../constants/mock-data";
+import { isMatch } from "../features/onboarding/lib/route-matcher";
 import Link from "next/link";
 
 interface RouteGuardProps {
+  initialPipelines: OnboardingPipeline[];
   children: React.ReactNode;
 }
 
-export function RouteGuard({ children }: RouteGuardProps) {
+export function RouteGuard({ initialPipelines, children }: RouteGuardProps) {
   const pathname = usePathname();
-  const { allStages } = useOnboarding();
 
   const isSafeZone = useMemo(() => {
     return alwaysAllowedRoutes.some((route) => isMatch(route, pathname));
   }, [pathname]);
+
+  const allStages = useMemo(() => {
+    return initialPipelines.flatMap((p) => p.stages);
+  }, [initialPipelines]);
 
   const blockingStep = useMemo(() => {
     if (isSafeZone) return undefined;

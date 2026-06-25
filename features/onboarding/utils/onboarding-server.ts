@@ -1,7 +1,9 @@
 import { cookies } from "next/headers";
-import { mock3DMatrixData, EmployeeType, DepartmentType } from "../constants/mock-data";
+import { mock3DMatrixData, EmployeeType, DepartmentType } from "../../../constants/mock-data";
 
 export async function getServerOnboardingState() {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
   const cookieStore = await cookies();
   const empType = cookieStore.get("emp_type")?.value as EmployeeType | undefined;
   const empDept = cookieStore.get("emp_dept")?.value as DepartmentType | undefined;

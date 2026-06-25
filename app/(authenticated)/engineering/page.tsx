@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getServerOnboardingState } from "../../../actions/onboarding-server";
+import { getServerOnboardingState } from "../../../features/onboarding/utils/onboarding-server";
+import { OnboardingPipeline, OnboardingStage, OnboardingStep } from "../../../constants/mock-data";
 
 export default async function EngineeringConsolePage() {
   const onboardingState = await getServerOnboardingState();
@@ -13,8 +14,9 @@ export default async function EngineeringConsolePage() {
     redirect("/dashboard");
   }
 
-  const allStages = onboardingState.hydratedPipelines.flatMap((p) => p.stages);
-  const step43 = allStages.flatMap((s) => s.steps).find((step) => step.id === "step-4-3");
+  const allStages = onboardingState.hydratedPipelines.flatMap((p: OnboardingPipeline) => p.stages);
+  const step43 = allStages.flatMap((s: OnboardingStage) => s.steps).find((step: OnboardingStep) => step.id === "step-4-3");
+
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">

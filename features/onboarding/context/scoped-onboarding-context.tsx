@@ -1,8 +1,19 @@
 "use client";
 
-import React, { createContext, useContext, useState, useMemo, useTransition } from "react";
-import { OnboardingPipeline, OnboardingStage, EmployeeType, DepartmentType } from "../constants/mock-data";
-import { updateOnboardingProgress } from "../actions/actions";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useTransition,
+} from "react";
+import {
+  OnboardingPipeline,
+  OnboardingStage,
+  EmployeeType,
+  DepartmentType,
+} from "../../../constants/mock-data";
+import { updateOnboardingProgress } from "../actions/onboarding-mutations";
 
 interface OnboardingContextProps {
   pipelines: OnboardingPipeline[];
@@ -15,11 +26,17 @@ interface OnboardingContextProps {
   empDept: DepartmentType;
   isStageUnlocked: (stageId: string) => boolean;
   isStepUnlocked: (stageId: string, stepId: string) => boolean;
-  handleToggleStep: (pipelineIdx: number, stageIdx: number, stepId: string) => void;
+  handleToggleStep: (
+    pipelineIdx: number,
+    stageIdx: number,
+    stepId: string,
+  ) => void;
   completeStepById: (stageId: string, stepId: string) => void;
 }
 
-const OnboardingContext = createContext<OnboardingContextProps | undefined>(undefined);
+const OnboardingContext = createContext<OnboardingContextProps | undefined>(
+  undefined,
+);
 
 interface OnboardingProviderProps {
   initialPipelineData: OnboardingPipeline[];
@@ -29,17 +46,24 @@ interface OnboardingProviderProps {
   children: React.ReactNode;
 }
 
-export function OnboardingProvider({ initialPipelineData, storageKey, empType, empDept, children }: OnboardingProviderProps) {
-  const [pipelines, setPipelines] = useState<OnboardingPipeline[]>(initialPipelineData);
+export function OnboardingProvider({
+  initialPipelineData,
+  storageKey,
+  empType,
+  empDept,
+  children,
+}: OnboardingProviderProps) {
+  const [pipelines, setPipelines] =
+    useState<OnboardingPipeline[]>(initialPipelineData);
   const [isPending, startTransition] = useTransition();
 
   React.useEffect(() => {
     setPipelines(initialPipelineData);
-  }, [JSON.stringify(initialPipelineData)]);
+  }, [initialPipelineData]);
 
   const allStages = useMemo<OnboardingStage[]>(
     () => pipelines.flatMap((p) => p.stages),
-    [pipelines]
+    [pipelines],
   );
 
   const hasIncompleteGate = useMemo(
@@ -47,17 +71,17 @@ export function OnboardingProvider({ initialPipelineData, storageKey, empType, e
       allStages
         .filter((s) => s.isSystemGate)
         .some((s) => s.steps.some((step) => !step.isCompleted)),
-    [allStages]
+    [allStages],
   );
 
   const canAccessDashboard = useMemo(
     () => !hasIncompleteGate,
-    [hasIncompleteGate]
+    [hasIncompleteGate],
   );
 
   const allCompleted = useMemo(
     () => allStages.every((s) => s.steps.every((step) => step.isCompleted)),
-    [allStages]
+    [allStages],
   );
 
   const isStageUnlocked = (stageId: string): boolean => {
@@ -74,7 +98,8 @@ export function OnboardingProvider({ initialPipelineData, storageKey, empType, e
     const stage = allStages.find((s) => s.id === stageId);
     if (!stage) return true;
     const step = stage.steps.find((st) => st.id === stepId);
-    if (!step || !step.dependsOn || step.dependsOn.steps.length === 0) return true;
+    if (!step || !step.dependsOn || step.dependsOn.steps.length === 0)
+      return true;
     return step.dependsOn.steps.every((prereqStepId) => {
       const prereq = stage.steps.find((st) => st.id === prereqStepId);
       return prereq?.isCompleted ?? false;
@@ -88,7 +113,11 @@ export function OnboardingProvider({ initialPipelineData, storageKey, empType, e
     });
   };
 
-  const handleToggleStep = (pipelineIdx: number, stageIdx: number, stepId: string) => {
+  const handleToggleStep = (
+    pipelineIdx: number,
+    stageIdx: number,
+    stepId: string,
+  ) => {
     const updated = pipelines.map((p, pIdx) => {
       if (pIdx !== pipelineIdx) return p;
       return {
@@ -98,7 +127,9 @@ export function OnboardingProvider({ initialPipelineData, storageKey, empType, e
           return {
             ...s,
             steps: s.steps.map((step) =>
-              step.id === stepId ? { ...step, isCompleted: !step.isCompleted } : step
+              step.id === stepId
+                ? { ...step, isCompleted: !step.isCompleted }
+                : step,
             ),
           };
         }),
@@ -115,7 +146,7 @@ export function OnboardingProvider({ initialPipelineData, storageKey, empType, e
         return {
           ...s,
           steps: s.steps.map((step) =>
-            step.id === stepId ? { ...step, isCompleted: true } : step
+            step.id === stepId ? { ...step, isCompleted: true } : step,
           ),
         };
       }),
@@ -147,6 +178,7 @@ export function OnboardingProvider({ initialPipelineData, storageKey, empType, e
 
 export function useOnboarding() {
   const context = useContext(OnboardingContext);
-  if (!context) throw new Error("useOnboarding must be used inside an OnboardingProvider");
+  if (!context)
+    throw new Error("useOnboarding must be used inside an OnboardingProvider");
   return context;
 }
